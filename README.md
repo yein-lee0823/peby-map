@@ -60,3 +60,48 @@ api를 아직 확실히 모르지만 api가 여러개일수도 있고 파람이 
 
 마커 갯수가 달라도 순서가 달라지면? 관리되는지도 생각해봐야할것
 
+
+[설계]
+
+1. 지도 위에 마커들을 찍는데
+    1. 특정 좌표를 중심으로 (반경 몇 미터 혹은 화면 내)
+        1. 내 위치 
+        2. 화면센터값
+    2. 좌표를 누르면 액션(윈도우가 뜨거나 바텀시트가 나오거나)
+2. 클러스터 기능 추가
+
+
+
+그러면 왜 오버레이를 깔지..? 어느 경우에 필요하지?
+2. 그 다음에 이 오버레이를 여러 겹을 깔 수 있는지?
+
+
+Window.naver 를 못찾는 문제 -> 두가지 답이 나와야함 -> 상태값으로 제어했음
+클러스터링 -> 레이어 하나 더 만들기
+
+
+Map
+├ ClusterLayer
+│ └ zoom 낮을 때
+│
+├ MarkerOverlay
+│ └ zoom 높을 때 마커들   —> 여기까지(수/목)
+│
+├ SelectedOverlay
+│ └ 선택된 마커 강조
+│
+└ InfoOverlay   —> 여기까지(금)
+└ 업체 정보 카드
+
+
+
+
+
+
+https://develop-obm.tistory.com/124
+https://postforty.tistory.com/430
+
+<마커 클러스터링>
+https://github.com/navermaps/marker-tools.js/tree/master/marker-clustering
+
+
