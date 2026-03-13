@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/* 서비스 컬러 팔레트 */
+@theme {
+  --color-white: #FFF;
+  --color-white-opacity80: rgba(255, 255, 255, 0.8);
+  --color-grey: #BDBDBD;
+  --color-deep-grey: #858A90;
+  --color-light-grey: #E9E9E9;
+  --color-bg-default-card: #FBFBFB;
+  --color-bg-divider: #F7F7F7;
+  --color-dark-grey: #454545;
+  --color-black: #1E1E1F;
+  --color-black-opacity90: rgba(30, 30, 31, 0.9);
+  --color-blue: #3568E9;
+  --color-orange: #FF6000;
+  --color-orange-opacity80: rgba(255, 96, 0, 0.8);
+  --color-light-orange: #FFCEB0;
+  --color-soft-orange: #FFF8F4;
+  --color-red: #FF5252;
+  --color-green: #33E749;
+  --color-soft-green: #F8FFF6;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-pretendard);
+}
