@@ -7,8 +7,8 @@ interface MapContextType {
   mapRef: React.RefObject<NaverMap | null>
   zoom: number
   setZoom: (v: number) => void
-  isMarkerLoaded: boolean
-  setIsMarkerLoaded: (v: boolean) => void
+  isMapLoaded: boolean
+  setIsMapLoaded: (v: boolean) => void
   isClusterLoaded: boolean
   setIsClusterLoaded: (v: boolean) => void
 }
@@ -18,7 +18,7 @@ const MapContext = createContext<MapContextType | null>(null)
 export function MapProvider({ children }: { children: React.ReactNode }) {
   const mapRef = useRef<NaverMap | null>(null)
   const [zoom, setZoom] = useState<number>(15)
-  const [isMarkerLoaded, setIsMarkerLoaded] = useState(false)
+  const [isMapLoaded, setIsMapLoaded] = useState(false)
   const [isClusterLoaded, setIsClusterLoaded] = useState(false)
 
   return (
@@ -27,8 +27,8 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         mapRef,
         zoom,
         setZoom,
-        isMarkerLoaded,
-        setIsMarkerLoaded,
+        isMapLoaded,
+        setIsMapLoaded,
         isClusterLoaded,
         setIsClusterLoaded,
       }}

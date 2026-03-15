@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { VendorListBaseProps } from '@/types/vendor'
 import { useRouter } from 'next/navigation'
 
-export const RealListBase = ({ data, onItemClick }: VendorListBaseProps) => {
+export const VendorListBase = ({ data, onItemClick }: VendorListBaseProps) => {
   const Component = onItemClick ? 'button' : 'div'
   const router = useRouter()
 

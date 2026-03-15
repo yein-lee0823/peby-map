@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { VendorViewBaseProps } from '@/types/vendor'
 
-export const RealViewBase = ({ data }: VendorViewBaseProps) => {
+export const VendorViewBase = ({ data }: VendorViewBaseProps) => {
   if (!data) {
     return null
   }

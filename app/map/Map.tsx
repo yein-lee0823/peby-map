@@ -5,12 +5,8 @@ import { useMap } from './MapProvider'
 // import { Coordinates } from '@/types/map'
 // import { getVendorsList } from '@/api/vendors'
 
-interface MapProps {
-  onIdle?: (map: naver.maps.Map) => void
-}
-
-export default function Navermap({ onIdle }: MapProps) {
-  const { mapRef, setIsMarkerLoaded, setIsClusterLoaded, setZoom } = useMap()
+export default function Navermap() {
+  const { mapRef, setIsMapLoaded, setIsClusterLoaded, setZoom } = useMap()
 
   if (!mapRef) return
 
@@ -25,6 +21,8 @@ export default function Navermap({ onIdle }: MapProps) {
     // mapRef에 등록
     mapRef.current = map
 
+    console.log('현 위치', navigator)
+    console.log('현 위치', navigator.geolocation)
     // 초기 좌표 = 내 위치
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -33,8 +31,6 @@ export default function Navermap({ onIdle }: MapProps) {
           const lng = pos.coords.longitude
           console.log(lat, lng, '이 좌표로 센터로 이동')
           map.setCenter(new naver.maps.LatLng(lat, lng))
-          // todo: 초기페치 getVendorsList(위도, 경도, 줌 레벨에 따른 반경값);
-          console.log('여기에서 Fiiiiiiirst 페치', lat, lng, map.getZoom())
         },
         (err) => {
           console.log('위치 가져오기 실패', err)
@@ -49,11 +45,12 @@ export default function Navermap({ onIdle }: MapProps) {
     })
 
     // map 이동시, 센터값 구하기
-    naver.maps.Event.addListener(map, 'idle', () => {
-      // 여기에서는 실행만 (필요한 값들은 page가 알고있음)
-      onIdle?.(map)
-      console.log('여기에서 chaaaaaange 될 때 페치')
-    })
+    // naver.maps.Event.addListener(map, 'idle', () => {
+    //   // 여기에서는 실행만 (필요한 값들은 page가 알고있음)
+    //   // todo 디바운스 적용이 필요하겠는데..?
+    //   onIdle?.(map)
+    //   console.log('여기에서 chaaaaaange 될 때 페치')
+    // })
   }
 
   return (
@@ -76,7 +73,7 @@ export default function Navermap({ onIdle }: MapProps) {
           }
           document.head.appendChild(script)
 
-          setIsMarkerLoaded(true)
+          setIsMapLoaded(true)
         }}
       />
       <div id="map" style={{ width: '100vw', height: '100vh' }} />

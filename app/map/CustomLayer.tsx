@@ -1,39 +1,53 @@
 'use client'
 
-import { RealMarker } from '@/components/Map/VendorMarkerBase'
+import { VendorMarkerBase } from '@/components/Map/VendorMarkerBase'
 import { useEffect, useRef } from 'react'
 import { createRoot, Root } from 'react-dom/client'
 import { useMap } from './MapProvider'
 import { VendorsListDto } from '@/api/dto/vendors.dto'
+import { ComponentType } from 'react'
 
 export default function MarkerOverlay({
   vendors,
   onItemClick,
+  layerIndex = 100,
+  MarkerComponent = VendorMarkerBase,
 }: {
   vendors: VendorsListDto[]
   onItemClick: (data: VendorsListDto) => void
+  layerIndex?: number
+  MarkerComponent?: ComponentType<{
+    data: VendorsListDto
+    onItemClick?: (data: VendorsListDto) => void
+  }>
 }) {
-  const { mapRef, isMarkerLoaded, zoom } = useMap()
+  const { mapRef, isMapLoaded, zoom } = useMap()
 
   const overlayRef = useRef<InstanceType<
     ReturnType<typeof createOverlayClass>
   > | null>(null)
 
-  // ① Overlay 한 번만 생성
+  // 1. Overlay 생성
   useEffect(() => {
-    if (!isMarkerLoaded || !mapRef.current || overlayRef.current) return
+    if (!isMapLoaded || !mapRef.current || overlayRef.current) return
 
     const map = mapRef.current
     const CustomOverlay = createOverlayClass()
-    const overlay = new CustomOverlay(vendors, onItemClick)
+    const overlay = new CustomOverlay(
+      vendors,
+      layerIndex,
+      MarkerComponent,
+      onItemClick,
+    )
 
     overlay.setMap(map)
     overlayRef.current = overlay
 
     return () => overlay.setMap(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMarkerLoaded, mapRef])
+  }, [isMapLoaded, mapRef])
 
+  // 2. 줌에 따른 숨김여부 처리
   useEffect(() => {
     if (!overlayRef.current) return
 
@@ -48,7 +62,7 @@ export default function MarkerOverlay({
     }
   }, [zoom])
 
-  // ② vendors가 바뀌면 draw()만 호출
+  // 3. vendors가 바뀌면 draw()만 호출
   useEffect(() => {
     console.log('바뀐 마커 호출')
     overlayRef.current?.updateMarkers(vendors)
@@ -63,25 +77,36 @@ const createOverlayClass = () => {
     private vendors: VendorsListDto[]
     private onItemClick?: (data: VendorsListDto) => void
     private div?: HTMLDivElement
+    private layerIndex: number
+    private MarkerComponent: ComponentType<{
+      data: VendorsListDto
+      onItemClick?: (data: VendorsListDto) => void
+    }>
 
     constructor(
       vendors: VendorsListDto[],
+      layerIndex: number = 100,
+      MarkerComponent: ComponentType<{
+        data: VendorsListDto
+        onItemClick?: (data: VendorsListDto) => void
+      }>,
       onItemClick?: (data: VendorsListDto) => void,
     ) {
       super()
       this.vendors = vendors
       this.onItemClick = onItemClick
+      this.layerIndex = layerIndex
+      this.MarkerComponent = MarkerComponent
     }
 
     // vendors 갱신 메서드
     public updateMarkers(newVendors: VendorsListDto[]) {
       this.vendors = newVendors
-      // console.log('마커를 갱신할 때, 마커 다시 생성')
-
+      const Marker = this.MarkerComponent
       this.root?.render(
         <>
           {this.vendors.map((vendor) => (
-            <RealMarker
+            <Marker
               key={vendor.id}
               data={vendor}
               onItemClick={this.onItemClick}
@@ -93,7 +118,7 @@ const createOverlayClass = () => {
       requestAnimationFrame(() => this.draw())
     }
 
-    // 요소 가져와서 zoom 값에 따라 on/off
+    // div 요소 메서드
     public getElement(): HTMLDivElement | undefined {
       return this.div
     }
@@ -103,11 +128,11 @@ const createOverlayClass = () => {
       this.div = div
       const root = createRoot(div)
       this.root = root
-
+      const Marker = this.MarkerComponent
       root.render(
         <>
           {this.vendors.map((vendor) => (
-            <RealMarker
+            <Marker
               key={vendor.id}
               data={vendor}
               onItemClick={this.onItemClick}
@@ -118,7 +143,6 @@ const createOverlayClass = () => {
 
       this.getPanes().overlayLayer.appendChild(div)
 
-      //
       // React 렌더 후 draw() 강제 호출
       requestAnimationFrame(() => {
         this.draw()
@@ -126,11 +150,10 @@ const createOverlayClass = () => {
     }
 
     draw() {
-      // console.log('처음에는 여기를 안그리나')
       if (!this.div) return
 
       const projection = this.getProjection()
-      // console.log('혹시 이게 없어서?', projection)
+
       if (!projection) return
       //   if (!projection) {
       //     requestAnimationFrame(() => this.draw())
@@ -154,6 +177,7 @@ const createOverlayClass = () => {
         // if (el) {
         const marker = el as HTMLElement
         marker.style.position = 'absolute'
+        marker.style.zIndex = String(this.layerIndex)
         marker.style.transform = `translate(${point.x}px, ${point.y}px) translate(-50%, -50%)`
         // }
       })

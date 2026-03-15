@@ -3,7 +3,10 @@
 import { VendorListBaseProps } from '@/types/vendor'
 import Image from 'next/image'
 
-export const RealMarker = ({ data, onItemClick }: VendorListBaseProps) => {
+export const VendorMarkerBase = ({
+  data,
+  onItemClick,
+}: VendorListBaseProps) => {
   const Component = onItemClick ? 'button' : 'div'
 
   return (
