@@ -61,6 +61,17 @@ export default function Navermap({ refetch }: NavermapProp) {
     naver.maps.Event.addListener(map, 'idle', async () => {
       const currentBounds = map.getBounds() as naver.maps.LatLngBounds;
       const currentZoom = map.getZoom();
+      const center = map.getCenter() as naver.maps.LatLng;
+
+      const data = {
+        lat: center.lat(),
+        lng: center.lng(),
+      };
+
+      if (window.ReactNativeWebView) {
+        console.log('앱으로 좌표 보냄', data);
+        window.ReactNativeWebView.postMessage(JSON.stringify(data));
+      }
 
       // 최초 1회
       if (!prevBounds) {
@@ -122,21 +133,21 @@ export default function Navermap({ refetch }: NavermapProp) {
     });
   };
 
-  useEffect(() => {
-    const send = () => {
-      if (window.ReactNativeWebView) {
-        console.log('보낸다!');
-        window.ReactNativeWebView.postMessage(
-          JSON.stringify({ test: 'hello' }),
-        );
-      } else {
-        console.log('없어서 재시도...');
-        setTimeout(send, 300);
-      }
-    };
+  // useEffect(() => {
+  //   const send = () => {
+  //     if (window.ReactNativeWebView) {
+  //       console.log('보낸다!');
+  //       window.ReactNativeWebView.postMessage(
+  //         JSON.stringify({ test: 'hello' }),
+  //       );
+  //     } else {
+  //       console.log('없어서 재시도...');
+  //       setTimeout(send, 300);
+  //     }
+  //   };
 
-    send();
-  }, []);
+  //   send();
+  // }, []);
 
   return (
     <>
