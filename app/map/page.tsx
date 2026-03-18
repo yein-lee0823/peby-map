@@ -1,16 +1,116 @@
-'use client'
+'use client';
 
-import { MapProvider } from './MapProvider'
-import DataLayer from './DataLayer'
+import { useState } from 'react';
+import { useEffect, useMemo } from 'react';
+import Navermap from './NaverMap';
+import MarkerLayer from './MarkerLayer';
+import ClusterLayer from './ClusterLayer';
+import { VendorsListDto } from '@/api/dto/vendors.dto';
+import { getVendorsList } from '@/api/vendors';
+import { HospitalMarker } from '@/components/Map/HospitalMarker';
+import { useMapStore } from '@/store/mapStore';
 
 export default function Map() {
+  const isMapLoaded = useMapStore((s) => s.isMapLoaded);
+  const mapStore = useMapStore((s) => s.mapStore);
+  // 레이어 on/off
+  const layerVisible = useMapStore((s) => s.layerVisible);
+  const setLayerVisible = useMapStore((s) => s.setLayerVisible);
+
+  const [vendorList, setVendorList] = useState<VendorsListDto[]>([]);
+  const hospitalVendors = vendorList.filter(
+    (vendor) => vendor.category === 'hospital',
+  );
+  const shopVendors = vendorList.filter((vendor) => vendor.category === 'shop');
+
+  // 클러스터 배열
+  const clusterData = useMemo(() => {
+    return [
+      ...(layerVisible.layer1 ? hospitalVendors : []),
+      ...(layerVisible.layer2 ? shopVendors : []),
+    ];
+  }, [layerVisible, hospitalVendors, shopVendors]);
+
+  //  마커 클릭 이벤트
+  const handleMarkerClick = (data: VendorsListDto) => {
+    // todo 상세 띄우기
+    console.log(data);
+  };
+
+  // 리페칭할 이벤트 (필터, 검색)
+  const handleMapData = async (map: naver.maps.Map) => {
+    const center = map.getCenter();
+    const zoom = map.getZoom();
+
+    console.log('페칭함수➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️', center, zoom);
+    const data = await getVendorsList();
+    if (data) setVendorList(data);
+    return;
+    //   {
+    //   lat: center.lat(),
+    //   lng: center.lng(),
+    //   zoom,
+    //   filter,
+    // }
+  };
+
+  useEffect(() => {
+    console.log('vendorList 바뀜!!!!!!!!!!!!!', vendorList);
+  }, [vendorList]);
+
+  useEffect(() => {
+    if (!isMapLoaded || !mapStore) return;
+    const fetchData = async () => {
+      await handleMapData(mapStore);
+    };
+    fetchData();
+  }, [isMapLoaded, mapStore]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="flex min-h-screen w-full flex-col justify-content-between items-center">
-        <MapProvider>
-          <DataLayer />
-        </MapProvider>
+    <>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="flex min-h-screen w-full flex-col justify-content-between items-center">
+          <Navermap refetch={handleMapData} />
+
+          <div className="bg-white p-2 absolute z-10 right-0 top-0">
+            <label>
+              <input
+                type="checkbox"
+                checked={layerVisible.layer1}
+                onChange={() => {
+                  setLayerVisible({ layer1: !layerVisible.layer1 });
+                }}
+              />
+              레이어1
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={layerVisible.layer2}
+                onChange={() => {
+                  setLayerVisible({ layer2: !layerVisible.layer2 });
+                }}
+              />
+              레이어2
+            </label>
+          </div>
+
+          <MarkerLayer
+            vendors={hospitalVendors}
+            onItemClick={handleMarkerClick}
+            layerKey="layer1"
+            MarkerComponent={HospitalMarker}
+          />
+
+          <MarkerLayer
+            vendors={shopVendors}
+            onItemClick={handleMarkerClick}
+            layerKey="layer2"
+          />
+
+          <ClusterLayer vendors={clusterData} />
+        </div>
       </div>
-    </div>
-  )
+    </>
+  );
 }
