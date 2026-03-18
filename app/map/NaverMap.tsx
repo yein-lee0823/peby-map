@@ -2,6 +2,7 @@
 
 import Script from 'next/script';
 import { useMapStore } from '@/store/mapStore';
+import { useEffect } from 'react';
 
 interface NavermapProp {
   refetch: (map: naver.maps.Map) => Promise<void>;
@@ -120,6 +121,22 @@ export default function Navermap({ refetch }: NavermapProp) {
       prevZoom = currentZoom;
     });
   };
+
+  useEffect(() => {
+    const send = () => {
+      if (window.ReactNativeWebView) {
+        console.log('보낸다!');
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({ test: 'hello' }),
+        );
+      } else {
+        console.log('없어서 재시도...');
+        setTimeout(send, 300);
+      }
+    };
+
+    send();
+  }, []);
 
   return (
     <>
