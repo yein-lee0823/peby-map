@@ -31,6 +31,13 @@ export default function Navermap({ refetch }: NavermapProp) {
           const lng = pos.coords.longitude;
           console.log(lat, lng, '이 좌표로 센터로 이동');
           map.setCenter(new naver.maps.LatLng(lat, lng));
+
+          const data = { lat, lng };
+          // 앱으로 전달
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify(data));
+            console.log('이게 있을까???', window.ReactNativeWebView);
+          }
         },
         (err) => {
           console.log('위치 가져오기 실패', err);
