@@ -59,6 +59,7 @@ export default function Navermap({ refetch }: NavermapProp) {
 
     // map 이동시 리페치
     naver.maps.Event.addListener(map, 'idle', async () => {
+      console.log('배포된게 맞나');
       const currentBounds = map.getBounds() as naver.maps.LatLngBounds;
       const currentZoom = map.getZoom();
       const center = map.getCenter() as naver.maps.LatLng;
