@@ -37,6 +37,7 @@ export default function Navermap({ refetch }: NavermapProp) {
           if (window.ReactNativeWebView) {
             window.ReactNativeWebView.postMessage(JSON.stringify(data));
             console.log('이게 있을까???', window.ReactNativeWebView);
+            console.log('userAgent:', navigator.userAgent);
           }
         },
         (err) => {
