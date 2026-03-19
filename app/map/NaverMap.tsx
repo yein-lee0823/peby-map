@@ -21,14 +21,18 @@ export default function Navermap({ refetch }: NavermapProp) {
   const pendingCenterRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const initializeMap = () => {
+    const isRN = typeof window !== 'undefined' && window.ReactNativeWebView;
+
+    let center;
     window.alert('initial 실행');
 
-    let center = new naver.maps.LatLng(37.5665, 126.978); // 기본 서울
-
-    // 👉 이미 RN 좌표 있으면 그걸로 시작
+    // 👉 RN 좌표 우선
     if (pendingCenterRef.current) {
       const { lat, lng } = pendingCenterRef.current;
       center = new naver.maps.LatLng(lat, lng);
+    } else {
+      // 👉 기본 fallback
+      center = new naver.maps.LatLng(37.5665, 126.978);
     }
 
     const map = new naver.maps.Map('map', {
@@ -37,25 +41,24 @@ export default function Navermap({ refetch }: NavermapProp) {
     });
 
     // map 전역상태에 등록
+    mapRef.current = map;
     setMap(map);
     setZoom(map.getZoom());
 
-    mapRef.current = map;
+    // 👉 RN 아닐 때만 geolocation 실행
+    if (!isRN && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
 
-    // 초기 좌표 = 내 위치
-    // if (navigator.geolocation) {
-    //   navigator.geolocation.getCurrentPosition(
-    //     (pos) => {
-    //       const lat = pos.coords.latitude;
-    //       const lng = pos.coords.longitude;
-    //       console.log(lat, lng, '이 좌표로 센터로 이동');
-    //       map.setCenter(new naver.maps.LatLng(lat, lng));
-    //     },
-    //     (err) => {
-    //       console.log('위치 가져오기 실패', err);
-    //     },
-    //   );
-    // }
+          map.setCenter(new naver.maps.LatLng(lat, lng));
+        },
+        (err) => {
+          console.log('위치 가져오기 실패', err);
+        },
+      );
+    }
 
     // map에 zoom 이벤트 등록 (클러스터 on/off 를 위함)
     naver.maps.Event.addListener(map, 'zoom_changed', () => {
