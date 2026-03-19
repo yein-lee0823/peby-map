@@ -48,6 +48,7 @@ export default function Navermap({ refetch }: NavermapProp) {
 
     if (isRN && initialCenterRef.current) {
       const { lat, lng } = initialCenterRef.current;
+      window.alert(`${lat}, 여기를 타야지`);
       center = new naver.maps.LatLng(lat, lng);
     }
 
