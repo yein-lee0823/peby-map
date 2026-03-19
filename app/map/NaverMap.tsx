@@ -17,12 +17,16 @@ export default function Navermap({ refetch }: NavermapProp) {
   const setZoom = useMapStore((s) => s.setZoom);
 
   useEffect(() => {
-    if (!window.ReactNativeWebView || !map) return;
+    if (!window.ReactNativeWebView) return;
 
     const onMessage = (event: Event) => {
       if (!(event instanceof MessageEvent)) return;
+
       const data = JSON.parse(event.data);
-      window.alert(`${(window.ReactNativeWebView, map, data)}`);
+
+      window.alert(data);
+
+      if (!map) return;
       map.setCenter(new naver.maps.LatLng(data.lat, data.lng));
     };
 
@@ -33,7 +37,8 @@ export default function Navermap({ refetch }: NavermapProp) {
       document.removeEventListener('message', onMessage);
       window.removeEventListener('message', onMessage);
     };
-  }, [map]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const initializeMap = () => {
     const map = new naver.maps.Map('map', {
