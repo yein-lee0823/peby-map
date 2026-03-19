@@ -4,7 +4,6 @@ import Script from 'next/script';
 import { useMapStore } from '@/store/mapStore';
 import { useEffect, useRef } from 'react';
 import { NaverMap } from '@/types/map';
-// import { useEffect, useRef } from 'react';
 
 interface NavermapProp {
   refetch: (map: naver.maps.Map) => Promise<void>;
@@ -12,26 +11,23 @@ interface NavermapProp {
 
 export default function Navermap({ refetch }: NavermapProp) {
   const setMap = useMapStore((s) => s.setMapStore);
-  // const map = useMapStore((s) => s.mapStore);
   const setIsMapLoaded = useMapStore((s) => s.setIsMapLoaded);
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
 
   const mapRef = useRef<NaverMap | null>(null);
-  const pendingCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+  const centerRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const initializeMap = () => {
-    const isRN = typeof window !== 'undefined' && window.ReactNativeWebView;
-
+    const isRN = typeof window !== 'undefined' && window.ReactNativeWebView; // RN 여부
     let center;
-    window.alert('initial 실행');
 
-    // 👉 RN 좌표 우선
-    if (pendingCenterRef.current) {
-      const { lat, lng } = pendingCenterRef.current;
+    // RN에서 넘어온 좌표값
+    if (centerRef.current) {
+      const { lat, lng } = centerRef.current;
       center = new naver.maps.LatLng(lat, lng);
     } else {
-      // 👉 기본 fallback
+      // 기본값
       center = new naver.maps.LatLng(37.5665, 126.978);
     }
 
@@ -42,10 +38,11 @@ export default function Navermap({ refetch }: NavermapProp) {
 
     // map 전역상태에 등록
     mapRef.current = map;
+
     setMap(map);
     setZoom(map.getZoom());
 
-    // 👉 RN 아닐 때만 geolocation 실행
+    // RN 아닐 때만 geolocation 실행
     if (!isRN && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -135,6 +132,7 @@ export default function Navermap({ refetch }: NavermapProp) {
     });
   };
 
+  // RN에서 위치 값 받아오기
   useEffect(() => {
     if (!window.ReactNativeWebView) return;
 
@@ -143,7 +141,7 @@ export default function Navermap({ refetch }: NavermapProp) {
 
       const data = JSON.parse(event.data);
 
-      pendingCenterRef.current = data;
+      centerRef.current = data;
 
       if (mapRef.current) {
         window.alert(data.lat);
