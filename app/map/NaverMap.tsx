@@ -44,8 +44,10 @@ export default function Navermap({ refetch }: NavermapProp) {
     setMap(map);
     setZoom(map.getZoom());
 
+    const isRN = typeof window !== 'undefined' && window.ReactNativeWebView;
+
     // 초기 좌표 = 내 위치
-    if (navigator.geolocation) {
+    if (!isRN && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const lat = pos.coords.latitude;
