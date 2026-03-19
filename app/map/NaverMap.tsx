@@ -2,7 +2,7 @@
 
 import Script from 'next/script';
 import { useMapStore } from '@/store/mapStore';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface NavermapProp {
   refetch: (map: naver.maps.Map) => Promise<void>;
@@ -15,6 +15,8 @@ export default function Navermap({ refetch }: NavermapProp) {
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
 
+  const pendingRef = useRef<{ lat: number; lng: number } | null>(null);
+
   const initializeMap = () => {
     const map = new naver.maps.Map('map', {
       center: new naver.maps.LatLng(37.5665, 126.978),
@@ -24,6 +26,17 @@ export default function Navermap({ refetch }: NavermapProp) {
     // map 전역상태에 등록
     setMap(map);
     setZoom(map.getZoom());
+
+    if (pendingRef.current) {
+      console.log('pending 위치 적용');
+
+      const { lat, lng } = pendingRef.current;
+
+      const newCenter = new naver.maps.LatLng(lat, lng);
+      map.setCenter(newCenter);
+
+      pendingRef.current = null;
+    }
 
     // 초기 좌표 = 내 위치
     // if (navigator.geolocation) {
@@ -127,23 +140,22 @@ export default function Navermap({ refetch }: NavermapProp) {
 
         console.log('웹에서 받은 위치', data);
 
+        // 👉 map 없으면 저장
         if (!map) {
-          console.log('map 아직 없음');
+          console.log('map 아직 없음 → ref 저장');
+          pendingRef.current = data;
           return;
         }
 
-        if (data.lat && data.lng) {
-          const newCenter = new naver.maps.LatLng(data.lat, data.lng);
+        // 👉 map 있으면 바로 적용
+        const newCenter = new naver.maps.LatLng(data.lat, data.lng);
 
-          map.setCenter(newCenter);
-          map.panTo(newCenter);
-        }
+        map.setCenter(newCenter);
       } catch (e) {
         console.log('파싱 에러', e);
       }
     };
 
-    // 🔥 둘 다 필수
     document.addEventListener('message', handler);
     window.addEventListener('message', handler);
 
