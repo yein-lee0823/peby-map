@@ -10,6 +10,7 @@ interface NavermapProp {
 
 export default function Navermap({ refetch }: NavermapProp) {
   const setMap = useMapStore((s) => s.setMapStore);
+  const map = useMapStore((s) => s.mapStore);
   const setIsMapLoaded = useMapStore((s) => s.setIsMapLoaded);
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
@@ -32,14 +33,6 @@ export default function Navermap({ refetch }: NavermapProp) {
     //       const lng = pos.coords.longitude;
     //       console.log(lat, lng, '이 좌표로 센터로 이동');
     //       map.setCenter(new naver.maps.LatLng(lat, lng));
-
-    //       const data = { lat, lng };
-    //       // 앱으로 전달
-    //       if (window.ReactNativeWebView) {
-    //         window.ReactNativeWebView.postMessage(JSON.stringify(data));
-    //         console.log('이게 있을까???', window.ReactNativeWebView);
-    //         console.log('userAgent:', navigator.userAgent);
-    //       }
     //     },
     //     (err) => {
     //       console.log('위치 가져오기 실패', err);
@@ -47,59 +40,6 @@ export default function Navermap({ refetch }: NavermapProp) {
     //   );
     // }
 
-    if (navigator.geolocation) {
-      setTimeout(() => {
-        console.log('강제 타이밍');
-
-        navigator.geolocation.getCurrentPosition((pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-
-          const newCenter = new naver.maps.LatLng(lat, lng);
-
-          map.setCenter(newCenter);
-          map.panTo(newCenter);
-          naver.maps.Event.trigger(map, 'resize');
-        });
-      }, 500);
-    }
-
-    // 앱에서 센터를 잡기 위한
-    // naver.maps.Event.addListener(map, 'idle', () => {
-    //   setTimeout(() => {
-    //     console.log('강제 타이밍');
-
-    //     navigator.geolocation.getCurrentPosition((pos) => {
-    //       const lat = pos.coords.latitude;
-    //       const lng = pos.coords.longitude;
-
-    //       const newCenter = new naver.maps.LatLng(lat, lng);
-
-    //       map.setCenter(newCenter);
-    //       map.panTo(newCenter);
-    //       naver.maps.Event.trigger(map, 'resize');
-    //     });
-    //   }, 500);
-    // });
-
-    // naver.maps.Event.once(map, 'idle', () => {
-    //   console.log('지도 첫 렌더 완료');
-
-    //   navigator.geolocation.getCurrentPosition((pos) => {
-    //     const lat = pos.coords.latitude;
-    //     const lng = pos.coords.longitude;
-
-    //     const newCenter = new naver.maps.LatLng(lat, lng);
-
-    //     map.setCenter(newCenter);
-    //     map.panTo(newCenter);
-    //     naver.maps.Event.trigger(map, 'resize');
-
-    //     if (window.ReactNativeWebView) {
-    //       window.ReactNativeWebView.postMessage(JSON.stringify({ lat, lng }));
-    //     }
-    //   });
-    // });
     // map에 zoom 이벤트 등록 (클러스터 on/off 를 위함)
     naver.maps.Event.addListener(map, 'zoom_changed', () => {
       console.log('zoom 상태값을 관리함', map.getZoom());
@@ -112,20 +52,8 @@ export default function Navermap({ refetch }: NavermapProp) {
 
     // map 이동시 리페치
     naver.maps.Event.addListener(map, 'idle', async () => {
-      console.log('배포된게 맞나');
       const currentBounds = map.getBounds() as naver.maps.LatLngBounds;
       const currentZoom = map.getZoom();
-      const center = map.getCenter() as naver.maps.LatLng;
-
-      const data = {
-        lat: center.lat(),
-        lng: center.lng(),
-      };
-      // todo 어디서 보낼지는 고민해보고 APP에서 받은 값으로 내 위치 보여주기
-      if (window.ReactNativeWebView) {
-        console.log('앱으로 좌표 보냄', data);
-        window.ReactNativeWebView.postMessage(JSON.stringify(data));
-      }
 
       // 최초 1회
       if (!prevBounds) {
@@ -187,21 +115,43 @@ export default function Navermap({ refetch }: NavermapProp) {
     });
   };
 
-  // useEffect(() => {
-  //   const send = () => {
-  //     if (window.ReactNativeWebView) {
-  //       console.log('보낸다!');
-  //       window.ReactNativeWebView.postMessage(
-  //         JSON.stringify({ test: 'hello' }),
-  //       );
-  //     } else {
-  //       console.log('없어서 재시도...');
-  //       setTimeout(send, 300);
-  //     }
-  //   };
+  // 앱에서 센터값 가져오기
+  useEffect(() => {
+    const handler = (event: Event) => {
+      if (!('data' in event)) return;
 
-  //   send();
-  // }, []);
+      const messageEvent = event as MessageEvent;
+
+      try {
+        const data = JSON.parse(messageEvent.data);
+
+        console.log('웹에서 받은 위치', data);
+
+        if (!map) {
+          console.log('map 아직 없음');
+          return;
+        }
+
+        if (data.lat && data.lng) {
+          const newCenter = new naver.maps.LatLng(data.lat, data.lng);
+
+          map.setCenter(newCenter);
+          map.panTo(newCenter);
+        }
+      } catch (e) {
+        console.log('파싱 에러', e);
+      }
+    };
+
+    // 🔥 둘 다 필수
+    document.addEventListener('message', handler);
+    window.addEventListener('message', handler);
+
+    return () => {
+      document.removeEventListener('message', handler);
+      window.removeEventListener('message', handler);
+    };
+  }, [map]);
 
   return (
     <>
