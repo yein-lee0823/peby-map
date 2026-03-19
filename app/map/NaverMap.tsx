@@ -60,24 +60,24 @@ export default function Navermap({ refetch }: NavermapProp) {
     //   });
     // });
 
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
+    naver.maps.Event.once(map, 'idle', () => {
+      console.log('지도 첫 렌더 완료');
 
-      setTimeout(() => {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
         const newCenter = new naver.maps.LatLng(lat, lng);
 
         map.setCenter(newCenter);
         map.panTo(newCenter);
-        console.log('newCenter::::::', newCenter);
         naver.maps.Event.trigger(map, 'resize');
 
         if (window.ReactNativeWebView) {
           window.ReactNativeWebView.postMessage(JSON.stringify({ lat, lng }));
         }
-      }, 300);
+      });
     });
-
     // map에 zoom 이벤트 등록 (클러스터 on/off 를 위함)
     naver.maps.Event.addListener(map, 'zoom_changed', () => {
       console.log('zoom 상태값을 관리함', map.getZoom());
