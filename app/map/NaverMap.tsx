@@ -48,16 +48,34 @@ export default function Navermap({ refetch }: NavermapProp) {
     // }
 
     // 앱에서 센터를 잡기 위한
-    naver.maps.Event.once(map, 'init', () => {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
+    // naver.maps.Event.once(map, 'init', () => {
+    //   navigator.geolocation.getCurrentPosition((pos) => {
+    //     const lat = pos.coords.latitude;
+    //     const lng = pos.coords.longitude;
 
+    //     const newCenter = new naver.maps.LatLng(lat, lng);
+    //     console.log('map init하고 센터값:::', newCenter);
+    //     map.setCenter(newCenter);
+    //     map.panTo(newCenter);
+    //   });
+    // });
+
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      setTimeout(() => {
         const newCenter = new naver.maps.LatLng(lat, lng);
-        console.log('map init하고 센터값:::', newCenter);
+
         map.setCenter(newCenter);
         map.panTo(newCenter);
-      });
+        console.log('newCenter::::::', newCenter);
+        naver.maps.Event.trigger(map, 'resize');
+
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ lat, lng }));
+        }
+      }, 300);
     });
 
     // map에 zoom 이벤트 등록 (클러스터 on/off 를 위함)
