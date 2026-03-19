@@ -27,7 +27,7 @@ export default function Navermap({ refetch }: NavermapProp) {
 
       const data = JSON.parse(event.data);
 
-      window.alert(`${data}, RN에서 받은 좌표`);
+      window.alert(data.lat);
 
       if (!mapRef.current) return;
 
@@ -44,6 +44,7 @@ export default function Navermap({ refetch }: NavermapProp) {
   }, [mapRef]);
 
   const initializeMap = () => {
+    window.alert('initial 실행');
     const map = new naver.maps.Map('map', {
       center: new naver.maps.LatLng(37.5665, 126.978),
       zoom: 15,
