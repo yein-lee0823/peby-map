@@ -15,7 +15,6 @@ export default function Navermap({ refetch }: NavermapProp) {
   const setIsMapLoaded = useMapStore((s) => s.setIsMapLoaded);
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
-  const isWebView = !!window.ReactNativeWebView;
 
   const initializeMap = () => {
     const map = new naver.maps.Map('map', {
@@ -42,7 +41,7 @@ export default function Navermap({ refetch }: NavermapProp) {
     //   );
     // }
 
-    if (isWebView) {
+    if (window.ReactNativeWebView) {
       const onMessage = (event: Event) => {
         if (!(event instanceof MessageEvent)) return;
         const data = JSON.parse(event.data);
