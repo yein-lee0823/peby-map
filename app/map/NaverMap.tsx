@@ -2,7 +2,7 @@
 
 import Script from 'next/script';
 import { useMapStore } from '@/store/mapStore';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 // import { useEffect, useRef } from 'react';
 
 interface NavermapProp {
@@ -16,6 +16,8 @@ export default function Navermap({ refetch }: NavermapProp) {
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
 
+  const initialCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+
   useEffect(() => {
     if (!window.ReactNativeWebView) return;
 
@@ -24,10 +26,10 @@ export default function Navermap({ refetch }: NavermapProp) {
 
       const data = JSON.parse(event.data);
 
-      window.alert(data);
+      window.alert(`${data}, RN에서 받은 좌표`);
 
-      if (!map) return;
-      map.setCenter(new naver.maps.LatLng(data.lat, data.lng));
+      // 👉 여기서 저장만
+      initialCenterRef.current = data;
     };
 
     document.addEventListener('message', onMessage);
@@ -37,12 +39,20 @@ export default function Navermap({ refetch }: NavermapProp) {
       document.removeEventListener('message', onMessage);
       window.removeEventListener('message', onMessage);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializeMap = () => {
+    const isRN = typeof window !== 'undefined' && window.ReactNativeWebView;
+
+    let center = new naver.maps.LatLng(37.5665, 126.978); // 기본값
+
+    if (isRN && initialCenterRef.current) {
+      const { lat, lng } = initialCenterRef.current;
+      center = new naver.maps.LatLng(lat, lng);
+    }
+
     const map = new naver.maps.Map('map', {
-      center: new naver.maps.LatLng(37.5665, 126.978),
+      center,
       zoom: 15,
     });
 
@@ -50,22 +60,20 @@ export default function Navermap({ refetch }: NavermapProp) {
     setMap(map);
     setZoom(map.getZoom());
 
-    const isRN = typeof window !== 'undefined' && window.ReactNativeWebView;
-
     // 초기 좌표 = 내 위치
-    if (!isRN && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          console.log(lat, lng, '이 좌표로 센터로 이동');
-          map.setCenter(new naver.maps.LatLng(lat, lng));
-        },
-        (err) => {
-          console.log('위치 가져오기 실패', err);
-        },
-      );
-    }
+    // if (!isRN && navigator.geolocation) {
+    //   navigator.geolocation.getCurrentPosition(
+    //     (pos) => {
+    //       const lat = pos.coords.latitude;
+    //       const lng = pos.coords.longitude;
+    //       console.log(lat, lng, '이 좌표로 센터로 이동');
+    //       map.setCenter(new naver.maps.LatLng(lat, lng));
+    //     },
+    //     (err) => {
+    //       console.log('위치 가져오기 실패', err);
+    //     },
+    //   );
+    // }
 
     // map에 zoom 이벤트 등록 (클러스터 on/off 를 위함)
     naver.maps.Event.addListener(map, 'zoom_changed', () => {
