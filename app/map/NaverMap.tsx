@@ -2,7 +2,8 @@
 
 import Script from 'next/script';
 import { useMapStore } from '@/store/mapStore';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+// import { useEffect, useRef } from 'react';
 
 interface NavermapProp {
   refetch: (map: naver.maps.Map) => Promise<void>;
@@ -10,12 +11,10 @@ interface NavermapProp {
 
 export default function Navermap({ refetch }: NavermapProp) {
   const setMap = useMapStore((s) => s.setMapStore);
-  const map = useMapStore((s) => s.mapStore);
+  // const map = useMapStore((s) => s.mapStore);
   const setIsMapLoaded = useMapStore((s) => s.setIsMapLoaded);
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
-
-  const pendingRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const initializeMap = () => {
     const map = new naver.maps.Map('map', {
@@ -26,17 +25,6 @@ export default function Navermap({ refetch }: NavermapProp) {
     // map 전역상태에 등록
     setMap(map);
     setZoom(map.getZoom());
-
-    if (pendingRef.current) {
-      console.log('pending 위치 적용');
-
-      const { lat, lng } = pendingRef.current;
-
-      const newCenter = new naver.maps.LatLng(lat, lng);
-      map.setCenter(newCenter);
-
-      pendingRef.current = null;
-    }
 
     // 초기 좌표 = 내 위치
     // if (navigator.geolocation) {
@@ -128,31 +116,21 @@ export default function Navermap({ refetch }: NavermapProp) {
     });
   };
 
-  // 앱에서 센터값 가져오기
   useEffect(() => {
+    console.log('여기실행???');
+
     const handler = (event: Event) => {
       if (!('data' in event)) return;
 
       const messageEvent = event as MessageEvent;
 
+      console.log('📩 앱에서 받은 raw 데이터:', messageEvent.data);
+
       try {
         const data = JSON.parse(messageEvent.data);
-
-        console.log('웹에서 받은 위치', data);
-
-        // 👉 map 없으면 저장
-        if (!map) {
-          console.log('map 아직 없음 → ref 저장');
-          pendingRef.current = data;
-          return;
-        }
-
-        // 👉 map 있으면 바로 적용
-        const newCenter = new naver.maps.LatLng(data.lat, data.lng);
-
-        map.setCenter(newCenter);
+        console.log('📦 파싱된 데이터:', data);
       } catch (e) {
-        console.log('파싱 에러', e);
+        console.log('❌ 파싱 실패', e);
       }
     };
 
@@ -163,7 +141,7 @@ export default function Navermap({ refetch }: NavermapProp) {
       document.removeEventListener('message', handler);
       window.removeEventListener('message', handler);
     };
-  }, [map]);
+  }, []);
 
   return (
     <>
