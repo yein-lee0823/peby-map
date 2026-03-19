@@ -47,8 +47,7 @@ export default function Navermap({ refetch }: NavermapProp) {
     //   );
     // }
 
-    // 앱에서 센터를 잡기 위한
-    naver.maps.Event.addListener(map, 'idle', () => {
+    if (navigator.geolocation) {
       setTimeout(() => {
         console.log('강제 타이밍');
 
@@ -63,7 +62,25 @@ export default function Navermap({ refetch }: NavermapProp) {
           naver.maps.Event.trigger(map, 'resize');
         });
       }, 500);
-    });
+    }
+
+    // 앱에서 센터를 잡기 위한
+    // naver.maps.Event.addListener(map, 'idle', () => {
+    //   setTimeout(() => {
+    //     console.log('강제 타이밍');
+
+    //     navigator.geolocation.getCurrentPosition((pos) => {
+    //       const lat = pos.coords.latitude;
+    //       const lng = pos.coords.longitude;
+
+    //       const newCenter = new naver.maps.LatLng(lat, lng);
+
+    //       map.setCenter(newCenter);
+    //       map.panTo(newCenter);
+    //       naver.maps.Event.trigger(map, 'resize');
+    //     });
+    //   }, 500);
+    // });
 
     // naver.maps.Event.once(map, 'idle', () => {
     //   console.log('지도 첫 렌더 완료');
