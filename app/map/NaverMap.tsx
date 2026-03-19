@@ -54,7 +54,7 @@ export default function Navermap({ refetch }: NavermapProp) {
         const lng = pos.coords.longitude;
 
         const newCenter = new naver.maps.LatLng(lat, lng);
-
+        console.log('map init하고 센터값:::', newCenter);
         map.setCenter(newCenter);
         map.panTo(newCenter);
       });
