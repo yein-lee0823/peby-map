@@ -144,7 +144,6 @@ export default function Navermap({ refetch }: NavermapProp) {
       centerRef.current = data;
 
       if (mapRef.current) {
-        window.alert(data.lat);
         mapRef.current.setCenter(new naver.maps.LatLng(data.lat, data.lng));
       }
     };
