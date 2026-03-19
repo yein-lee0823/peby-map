@@ -25,27 +25,40 @@ export default function Navermap({ refetch }: NavermapProp) {
     setZoom(map.getZoom());
 
     // 초기 좌표 = 내 위치
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          console.log(lat, lng, '이 좌표로 센터로 이동');
-          map.setCenter(new naver.maps.LatLng(lat, lng));
+    // if (navigator.geolocation) {
+    //   navigator.geolocation.getCurrentPosition(
+    //     (pos) => {
+    //       const lat = pos.coords.latitude;
+    //       const lng = pos.coords.longitude;
+    //       console.log(lat, lng, '이 좌표로 센터로 이동');
+    //       map.setCenter(new naver.maps.LatLng(lat, lng));
 
-          const data = { lat, lng };
-          // 앱으로 전달
-          if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(JSON.stringify(data));
-            console.log('이게 있을까???', window.ReactNativeWebView);
-            console.log('userAgent:', navigator.userAgent);
-          }
-        },
-        (err) => {
-          console.log('위치 가져오기 실패', err);
-        },
-      );
-    }
+    //       const data = { lat, lng };
+    //       // 앱으로 전달
+    //       if (window.ReactNativeWebView) {
+    //         window.ReactNativeWebView.postMessage(JSON.stringify(data));
+    //         console.log('이게 있을까???', window.ReactNativeWebView);
+    //         console.log('userAgent:', navigator.userAgent);
+    //       }
+    //     },
+    //     (err) => {
+    //       console.log('위치 가져오기 실패', err);
+    //     },
+    //   );
+    // }
+
+    // 앱에서 센터를 잡기 위한
+    naver.maps.Event.once(map, 'init', () => {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        const newCenter = new naver.maps.LatLng(lat, lng);
+
+        map.setCenter(newCenter);
+        map.panTo(newCenter);
+      });
+    });
 
     // map에 zoom 이벤트 등록 (클러스터 on/off 를 위함)
     naver.maps.Event.addListener(map, 'zoom_changed', () => {
@@ -68,7 +81,7 @@ export default function Navermap({ refetch }: NavermapProp) {
         lat: center.lat(),
         lng: center.lng(),
       };
-
+      // todo 어디서 보낼지는 고민해보고 APP에서 받은 값으로 내 위치 보여주기
       if (window.ReactNativeWebView) {
         console.log('앱으로 좌표 보냄', data);
         window.ReactNativeWebView.postMessage(JSON.stringify(data));
