@@ -2,7 +2,7 @@
 
 import Script from 'next/script';
 import { useMapStore } from '@/store/mapStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 // import { useEffect, useRef } from 'react';
 
 interface NavermapProp {
@@ -15,14 +15,19 @@ export default function Navermap({ refetch }: NavermapProp) {
   const setIsMapLoaded = useMapStore((s) => s.setIsMapLoaded);
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
+  const [initialCenter, setInitialCenter] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!window.ReactNativeWebView || !map) return;
 
     const onMessage = (event: Event) => {
       if (!(event instanceof MessageEvent)) return;
-      const data = JSON.parse(event.data);
-      map.setCenter(new naver.maps.LatLng(data.lat, data.lng));
+      const { lat, lng } = JSON.parse(event.data);
+      map.setCenter(new naver.maps.LatLng(lat, lng));
+      setInitialCenter({ lat, lng });
     };
 
     document.addEventListener('message', onMessage);
@@ -35,8 +40,10 @@ export default function Navermap({ refetch }: NavermapProp) {
   }, [map]);
 
   const initializeMap = () => {
+    if (!initialCenter) return;
+
     const map = new naver.maps.Map('map', {
-      center: new naver.maps.LatLng(37.5665, 126.978),
+      center: new naver.maps.LatLng(initialCenter.lat, initialCenter.lng),
       zoom: 15,
     });
 
