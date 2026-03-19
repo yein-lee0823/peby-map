@@ -3,6 +3,7 @@
 import Script from 'next/script';
 import { useMapStore } from '@/store/mapStore';
 import { useEffect, useRef } from 'react';
+import { NaverMap } from '@/types/map';
 // import { useEffect, useRef } from 'react';
 
 interface NavermapProp {
@@ -11,12 +12,12 @@ interface NavermapProp {
 
 export default function Navermap({ refetch }: NavermapProp) {
   const setMap = useMapStore((s) => s.setMapStore);
-  const map = useMapStore((s) => s.mapStore);
+  // const map = useMapStore((s) => s.mapStore);
   const setIsMapLoaded = useMapStore((s) => s.setIsMapLoaded);
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
 
-  const initialCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+  const mapRef = useRef<NaverMap | null>(null);
 
   useEffect(() => {
     if (!window.ReactNativeWebView) return;
@@ -28,8 +29,9 @@ export default function Navermap({ refetch }: NavermapProp) {
 
       window.alert(`${data}, RN에서 받은 좌표`);
 
-      // 👉 여기서 저장만
-      initialCenterRef.current = data;
+      if (!mapRef.current) return;
+
+      mapRef.current.setCenter(new naver.maps.LatLng(data.lat, data.lng));
     };
 
     document.addEventListener('message', onMessage);
@@ -39,21 +41,11 @@ export default function Navermap({ refetch }: NavermapProp) {
       document.removeEventListener('message', onMessage);
       window.removeEventListener('message', onMessage);
     };
-  }, []);
+  }, [mapRef]);
 
   const initializeMap = () => {
-    const isRN = typeof window !== 'undefined' && window.ReactNativeWebView;
-
-    let center = new naver.maps.LatLng(37.5665, 126.978); // 기본값
-
-    if (isRN && initialCenterRef.current) {
-      const { lat, lng } = initialCenterRef.current;
-      window.alert(`${lat}, 여기를 타야지`);
-      center = new naver.maps.LatLng(lat, lng);
-    }
-
     const map = new naver.maps.Map('map', {
-      center,
+      center: new naver.maps.LatLng(37.5665, 126.978),
       zoom: 15,
     });
 
@@ -61,8 +53,10 @@ export default function Navermap({ refetch }: NavermapProp) {
     setMap(map);
     setZoom(map.getZoom());
 
+    mapRef.current = map;
+
     // 초기 좌표 = 내 위치
-    // if (!isRN && navigator.geolocation) {
+    // if (navigator.geolocation) {
     //   navigator.geolocation.getCurrentPosition(
     //     (pos) => {
     //       const lat = pos.coords.latitude;
