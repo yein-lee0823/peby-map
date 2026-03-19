@@ -45,19 +45,19 @@ export default function Navermap({ refetch }: NavermapProp) {
     setZoom(map.getZoom());
 
     // 초기 좌표 = 내 위치
-    // if (navigator.geolocation) {
-    //   navigator.geolocation.getCurrentPosition(
-    //     (pos) => {
-    //       const lat = pos.coords.latitude;
-    //       const lng = pos.coords.longitude;
-    //       console.log(lat, lng, '이 좌표로 센터로 이동');
-    //       map.setCenter(new naver.maps.LatLng(lat, lng));
-    //     },
-    //     (err) => {
-    //       console.log('위치 가져오기 실패', err);
-    //     },
-    //   );
-    // }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          console.log(lat, lng, '이 좌표로 센터로 이동');
+          map.setCenter(new naver.maps.LatLng(lat, lng));
+        },
+        (err) => {
+          console.log('위치 가져오기 실패', err);
+        },
+      );
+    }
 
     // map에 zoom 이벤트 등록 (클러스터 on/off 를 위함)
     naver.maps.Event.addListener(map, 'zoom_changed', () => {
