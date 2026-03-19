@@ -16,6 +16,23 @@ export default function Navermap({ refetch }: NavermapProp) {
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
 
+  useEffect(() => {
+    if (!window.ReactNativeWebView) return;
+
+    const onMessage = (event: Event) => {
+      if (!(event instanceof MessageEvent)) return;
+      window.alert(event.data);
+    };
+
+    document.addEventListener('message', onMessage);
+    window.addEventListener('message', onMessage);
+
+    return () => {
+      document.removeEventListener('message', onMessage);
+      window.removeEventListener('message', onMessage);
+    };
+  }, []);
+
   const initializeMap = () => {
     const map = new naver.maps.Map('map', {
       center: new naver.maps.LatLng(37.5665, 126.978),
@@ -41,16 +58,16 @@ export default function Navermap({ refetch }: NavermapProp) {
     //   );
     // }
 
-    if (window.ReactNativeWebView) {
-      const onMessage = (event: Event) => {
-        if (!(event instanceof MessageEvent)) return;
-        const data = JSON.parse(event.data);
-        map.setCenter(data);
-      };
+    // if (window.ReactNativeWebView) {
+    //   const onMessage = (event: Event) => {
+    //     if (!(event instanceof MessageEvent)) return;
+    //     const data = JSON.parse(event.data);
+    //     map.setCenter(data);
+    //   };
 
-      document.addEventListener('message', onMessage);
-      window.addEventListener('message', onMessage);
-    }
+    //   document.addEventListener('message', onMessage);
+    //   window.addEventListener('message', onMessage);
+    // }
 
     // map에 zoom 이벤트 등록 (클러스터 on/off 를 위함)
     naver.maps.Event.addListener(map, 'zoom_changed', () => {
