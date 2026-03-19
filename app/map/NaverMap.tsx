@@ -18,35 +18,21 @@ export default function Navermap({ refetch }: NavermapProp) {
   const setZoom = useMapStore((s) => s.setZoom);
 
   const mapRef = useRef<NaverMap | null>(null);
-
-  useEffect(() => {
-    if (!window.ReactNativeWebView) return;
-
-    const onMessage = (event: Event) => {
-      if (!(event instanceof MessageEvent)) return;
-
-      const data = JSON.parse(event.data);
-
-      window.alert(data.lat);
-
-      if (!mapRef.current) return;
-
-      mapRef.current.setCenter(new naver.maps.LatLng(data.lat, data.lng));
-    };
-
-    document.addEventListener('message', onMessage);
-    window.addEventListener('message', onMessage);
-
-    return () => {
-      document.removeEventListener('message', onMessage);
-      window.removeEventListener('message', onMessage);
-    };
-  }, [mapRef]);
+  const pendingCenterRef = useRef<{ lat: number; lng: number } | null>(null);
 
   const initializeMap = () => {
     window.alert('initial 실행');
+
+    let center = new naver.maps.LatLng(37.5665, 126.978); // 기본 서울
+
+    // 👉 이미 RN 좌표 있으면 그걸로 시작
+    if (pendingCenterRef.current) {
+      const { lat, lng } = pendingCenterRef.current;
+      center = new naver.maps.LatLng(lat, lng);
+    }
+
     const map = new naver.maps.Map('map', {
-      center: new naver.maps.LatLng(37.5665, 126.978),
+      center,
       zoom: 15,
     });
 
@@ -145,6 +131,31 @@ export default function Navermap({ refetch }: NavermapProp) {
       prevZoom = currentZoom;
     });
   };
+
+  useEffect(() => {
+    if (!window.ReactNativeWebView) return;
+
+    const onMessage = (event: Event) => {
+      if (!(event instanceof MessageEvent)) return;
+
+      const data = JSON.parse(event.data);
+
+      pendingCenterRef.current = data;
+
+      if (mapRef.current) {
+        window.alert(data.lat);
+        mapRef.current.setCenter(new naver.maps.LatLng(data.lat, data.lng));
+      }
+    };
+
+    document.addEventListener('message', onMessage);
+    window.addEventListener('message', onMessage);
+
+    return () => {
+      document.removeEventListener('message', onMessage);
+      window.removeEventListener('message', onMessage);
+    };
+  }, []);
 
   return (
     <>
