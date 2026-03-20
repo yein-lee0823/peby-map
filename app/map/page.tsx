@@ -13,11 +13,12 @@ import { useMapStore } from '@/store/mapStore';
 export default function Map() {
   const isMapLoaded = useMapStore((s) => s.isMapLoaded);
   const mapStore = useMapStore((s) => s.mapStore);
-  // 레이어 on/off
   const layerVisible = useMapStore((s) => s.layerVisible);
   const setLayerVisible = useMapStore((s) => s.setLayerVisible);
 
   const [vendorList, setVendorList] = useState<VendorsListDto[]>([]);
+
+  // 각 레이어에 삽입될 필터 값
   const hospitalVendors = vendorList.filter(
     (vendor) => vendor.category === 'hospital',
   );
@@ -37,26 +38,16 @@ export default function Map() {
     console.log(data);
   };
 
-  // 리페칭할 이벤트 (필터, 검색)
+  // 리페칭 함수 (필터, 검색)
   const handleMapData = async (map: naver.maps.Map) => {
     const center = map.getCenter();
     const zoom = map.getZoom();
 
-    console.log('페칭함수➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️➡️', center, zoom);
+    console.log('페칭함수➡️➡️➡️➡️➡️➡️➡️➡️', center, zoom);
     const data = await getVendorsList();
     if (data) setVendorList(data);
     return;
-    //   {
-    //   lat: center.lat(),
-    //   lng: center.lng(),
-    //   zoom,
-    //   filter,
-    // }
   };
-
-  useEffect(() => {
-    console.log('vendorList 바뀜!!!!!!!!!!!!!', vendorList);
-  }, [vendorList]);
 
   useEffect(() => {
     if (!isMapLoaded || !mapStore) return;

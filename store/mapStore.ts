@@ -1,24 +1,29 @@
-import { create } from 'zustand'
-import { NaverMap } from '@/types/map'
+import { create } from 'zustand';
+import { NaverMap } from '@/types/map';
 
 interface MapStore {
-  mapStore: NaverMap | null
-  setMapStore: (map: NaverMap) => void
+  // 지도
+  mapStore: NaverMap | null;
+  setMapStore: (map: NaverMap) => void;
 
-  zoom: number
-  setZoom: (v: number) => void
+  // zoom
+  zoom: number;
+  setZoom: (v: number) => void;
 
-  isMapLoaded: boolean
-  setIsMapLoaded: (v: boolean) => void
+  // 지도 로딩 여부
+  isMapLoaded: boolean;
+  setIsMapLoaded: (v: boolean) => void;
 
-  isClusterLoaded: boolean
-  setIsClusterLoaded: (v: boolean) => void
+  // 클러스터 로딩 여부
+  isClusterLoaded: boolean;
+  setIsClusterLoaded: (v: boolean) => void;
 
+  // layer on/off
   layerVisible: {
-    layer1: boolean
-    layer2: boolean
-  }
-  setLayerVisible: (v: Partial<MapStore['layerVisible']>) => void
+    layer1: boolean;
+    layer2: boolean;
+  };
+  setLayerVisible: (v: Partial<MapStore['layerVisible']>) => void;
 }
 
 export const useMapStore = create<MapStore>((set) => ({
@@ -27,7 +32,7 @@ export const useMapStore = create<MapStore>((set) => ({
 
   zoom: 0,
   setZoom: (v) => {
-    set({ zoom: v })
+    set({ zoom: v });
   },
 
   isMapLoaded: false,
@@ -47,4 +52,4 @@ export const useMapStore = create<MapStore>((set) => ({
         ...v,
       },
     })),
-}))
+}));

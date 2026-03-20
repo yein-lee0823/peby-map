@@ -15,9 +15,11 @@ export default function Navermap({ refetch }: NavermapProp) {
   const setIsClusterLoaded = useMapStore((s) => s.setIsClusterLoaded);
   const setZoom = useMapStore((s) => s.setZoom);
 
+  // Ref
   const mapRef = useRef<NaverMap | null>(null);
   const centerRef = useRef<{ lat: number; lng: number } | null>(null);
 
+  // map 초기화
   const initializeMap = () => {
     const isRN = typeof window !== 'undefined' && window.ReactNativeWebView; // RN 여부
     let center;
@@ -36,13 +38,13 @@ export default function Navermap({ refetch }: NavermapProp) {
       zoom: 15,
     });
 
-    // map 전역상태에 등록
     mapRef.current = map;
 
+    // map 전역상태 저장
     setMap(map);
     setZoom(map.getZoom());
 
-    // RN 아닐 때만 geolocation 실행
+    // RN 아닐 때만(브라우저 실행시) geolocation 으로 좌표 이동
     if (!isRN && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -59,7 +61,6 @@ export default function Navermap({ refetch }: NavermapProp) {
 
     // map에 zoom 이벤트 등록 (클러스터 on/off 를 위함)
     naver.maps.Event.addListener(map, 'zoom_changed', () => {
-      console.log('zoom 상태값을 관리함', map.getZoom());
       setZoom(map.getZoom());
     });
 
@@ -110,18 +111,16 @@ export default function Navermap({ refetch }: NavermapProp) {
         paddedBounds.hasLatLng(currentBounds.getNE());
 
       if (!isInside) {
-        console.log('bounds 벗어남 👉 fetch');
         isRefetch = true;
       }
 
-      // 줌인인데 기존 범위 안이면 fetch ❌
+      // 줌인인데 기존 범위 안이면 fetch X
       if (isZoomIn && isInside) {
-        console.log('줌인 + 기존 범위 내부 👉 fetch 안함');
         isRefetch = false;
       }
 
       if (!isRefetch) {
-        console.log('no fetchhhhhhhhhhhh');
+        console.log('no fetchhhhhh');
         return;
       }
 
@@ -136,6 +135,7 @@ export default function Navermap({ refetch }: NavermapProp) {
   useEffect(() => {
     if (!window.ReactNativeWebView) return;
 
+    // RN에서 받은 현위치 값으로 지도 이동
     const onMessage = (event: Event) => {
       if (!(event instanceof MessageEvent)) return;
 
@@ -148,9 +148,11 @@ export default function Navermap({ refetch }: NavermapProp) {
       }
     };
 
+    // RN에서 현위치 값 받는 이벤트 등록
     document.addEventListener('message', onMessage);
     window.addEventListener('message', onMessage);
 
+    // RN으로 준비 완료 알림
     window.ReactNativeWebView.postMessage('ready');
 
     return () => {
@@ -171,7 +173,7 @@ export default function Navermap({ refetch }: NavermapProp) {
 
           // 클러스터 js
           const script = document.createElement('script');
-          script.src = '/scripts/MarkerClustering.js'; // 프로젝트 안에 추가한 MarkerClustering.js
+          script.src = '/scripts/MarkerClustering.js';
           script.onload = () => {
             console.log('MarkerClustering loaded');
             setIsClusterLoaded(true);

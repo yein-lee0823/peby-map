@@ -51,7 +51,7 @@ export default function ClusterLayer({ vendors }: ClusterLayerProps) {
       });
     }
 
-    // 1. 클러스터 생성
+    // 클러스터 생성
     if (!clusterRef.current.clusterer) {
       clusterRef.current.clusterer = new MarkerClustering({
         map,
@@ -76,14 +76,12 @@ export default function ClusterLayer({ vendors }: ClusterLayerProps) {
       });
     }
 
-    // ④ zoom 기준으로 마커/클러스터 전환
+    // zoom 기준으로 마커/클러스터 전환
     if (zoomInit < 13) {
       clusterRef.current.clusterer.setMap(map);
     } else {
       clusterRef.current.clusterer.setMap(null);
     }
-
-    // cleanup: 마커나 클러스터를 새로 만들 필요 없음
   }, [isMapLoaded, isClusterLoaded, mapStore, vendors, zoom]);
 
   return null;

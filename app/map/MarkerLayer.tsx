@@ -35,7 +35,7 @@ export default function MarkerLayer({
     ReturnType<typeof createOverlayClass>
   > | null>(null);
 
-  // 1. Overlay 생성
+  // Overlay 생성
   useEffect(() => {
     if (!isMapLoaded || !mapStore || overlayRef.current) return;
 
@@ -59,7 +59,7 @@ export default function MarkerLayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMapLoaded, mapStore]);
 
-  // 2. 줌 & layer on/off에 따른 숨김여부 처리
+  // 줌 & layer on/off에 따른 숨김여부 처리
   useEffect(() => {
     if (!overlayRef.current) return;
 
@@ -77,11 +77,9 @@ export default function MarkerLayer({
     }
   }, [zoom, layerVisible, layerKey]);
 
-  // 3. vendors가 바뀌면 draw()만 호출
-
+  // vendors가 바뀌면 draw()만 호출
   useEffect(() => {
     if (!overlayRef.current) return;
-
     overlayRef.current.updateMarkers(vendors);
   }, [vendors]);
 
@@ -180,7 +178,6 @@ const createOverlayClass = () => {
         const el = this.div?.querySelector(`#marker-${vendor.id}`);
 
         if (!el) {
-          // console.log('다시 그리기')
           requestAnimationFrame(() => this.draw());
           return;
         }
