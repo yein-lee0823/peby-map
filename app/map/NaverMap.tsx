@@ -4,6 +4,7 @@ import Script from 'next/script';
 import { useMapStore } from '@/store/mapStore';
 import { useEffect, useRef } from 'react';
 import { NaverMap } from '@/types/map';
+import { isProxyFile } from 'next/dist/build/utils';
 
 interface NavermapProp {
   refetch: (map: naver.maps.Map) => Promise<void>;
@@ -141,23 +142,30 @@ export default function Navermap({ refetch }: NavermapProp) {
 
       const data = JSON.parse(event.data);
 
-      centerRef.current = data;
+      // LOCATION 데이터
+      if (data.type === 'LOCATION') {
+        const { lat, lng } = data.data;
+        centerRef.current = { lat, lng };
 
-      if (mapRef.current) {
-        mapRef.current.setCenter(new naver.maps.LatLng(data.lat, data.lng));
+        if (mapRef.current) {
+          mapRef.current.setCenter(new naver.maps.LatLng(lat, lng));
+        }
       }
+
+      // if (data.type === 'USER_DATA')
+      // 추후에 유저데이터 전역으로 저장
     };
 
     // RN에서 현위치 값 받는 이벤트 등록
-    document.addEventListener('message', onMessage);
-    window.addEventListener('message', onMessage);
+    document.addEventListener('message', onMessage); // ios
+    window.addEventListener('message', onMessage); // android
 
     // RN으로 준비 완료 알림
     window.ReactNativeWebView.postMessage('ready');
 
     return () => {
-      document.removeEventListener('message', onMessage);
-      window.removeEventListener('message', onMessage);
+      document.removeEventListener('message', onMessage); // ios
+      window.removeEventListener('message', onMessage); // android
     };
   }, []);
 
