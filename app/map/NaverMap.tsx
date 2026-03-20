@@ -151,6 +151,8 @@ export default function Navermap({ refetch }: NavermapProp) {
     document.addEventListener('message', onMessage);
     window.addEventListener('message', onMessage);
 
+    window.ReactNativeWebView.postMessage('ready');
+
     return () => {
       document.removeEventListener('message', onMessage);
       window.removeEventListener('message', onMessage);
