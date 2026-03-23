@@ -37,33 +37,13 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Memo
 
-
-우선 지금 있는 코드흐름 분석해보기
-리팩토링 할게있나
-응용해보기
-
-—> 질문 만들기
-
-주말까지 끌고가지 말고 오늘 끝내자?
-
-- 지도를 이동하면서? 계속 센터값을 api에 던져서 리스트를 받아와야함
-- 그러면 센터값을 알아야함
-
-126.9115815, 37.5485241 잡았다가
-126.91158152881074, 37.54852410061263
-
-내 위치마커가 계속 따라다녀야하나?
-
-
-그런데 NaverMap이 알아야할 것이 페칭하는 api 맞을까?
-api를 아직 확실히 모르지만 api가 여러개일수도 있고 파람이 바뀔수도있는데 페칭한 결과값을 아는 곳이 page야
-
-마커 갯수가 달라도 순서가 달라지면? 관리되는지도 생각해봐야할것
-
+그런데 NaverMap이 알아야 할 것이 페칭하는 api 맞을까?
+api가 여러개일수도 있고 파람이 바뀔수도있는데 페칭한 결과값을 아는 곳이 page
+마커 갯수가 달라도 순서가 달라지면? 관리되는지도 생각해봐야 할 것
 
 [설계]
 
-1. 지도 위에 마커들을 찍는데
+1. 지도 위에 마커 찍기
     1. 특정 좌표를 중심으로 (반경 몇 미터 혹은 화면 내)
         1. 내 위치 
         2. 화면센터값
@@ -71,38 +51,5 @@ api를 아직 확실히 모르지만 api가 여러개일수도 있고 파람이 
 2. 클러스터 기능 추가
 
 
-
-그러면 왜 오버레이를 깔지..? 어느 경우에 필요하지?
-2. 그 다음에 이 오버레이를 여러 겹을 깔 수 있는지?
-
-
-Window.naver 를 못찾는 문제 -> 두가지 답이 나와야함 -> 상태값으로 제어했음
-클러스터링 -> 레이어 하나 더 만들기
-
-
-Map
-├ ClusterLayer
-│ └ zoom 낮을 때
-│
-├ MarkerOverlay
-│ └ zoom 높을 때 마커들   —> 여기까지(수/목)
-│
-├ SelectedOverlay
-│ └ 선택된 마커 강조
-│
-└ InfoOverlay   —> 여기까지(금)
-└ 업체 정보 카드
-
-
-
-
-
-
-https://develop-obm.tistory.com/124
-https://postforty.tistory.com/430
-https://navermaps.github.io/maps.js.ncp/docs/tutorial-custom-overlay.example.html
-
-<마커 클러스터링>
-https://github.com/navermaps/marker-tools.js/tree/master/marker-clustering
 
 
