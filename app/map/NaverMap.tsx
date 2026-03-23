@@ -4,7 +4,6 @@ import Script from 'next/script';
 import { useMapStore } from '@/store/mapStore';
 import { useEffect, useRef } from 'react';
 import { NaverMap } from '@/types/map';
-import { isProxyFile } from 'next/dist/build/utils';
 
 interface NavermapProp {
   refetch: (map: naver.maps.Map) => Promise<void>;
