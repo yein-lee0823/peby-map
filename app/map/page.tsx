@@ -41,9 +41,8 @@ export default function Map() {
   // 리페칭 함수 (필터, 검색)
   const handleMapData = async (map: naver.maps.Map) => {
     const center = map.getCenter();
-    const zoom = map.getZoom();
 
-    console.log('페칭함수➡️➡️➡️➡️➡️➡️➡️➡️', center, zoom);
+    console.log('페칭함수➡️➡️➡️➡️➡️➡️➡️➡️', center);
     const data = await getVendorsList();
     if (data) setVendorList(data);
     return;

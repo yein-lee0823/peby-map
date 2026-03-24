@@ -13,7 +13,6 @@ export default function ClusterLayer({ vendors }: ClusterLayerProps) {
   const isMapLoaded = useMapStore((s) => s.isMapLoaded);
   const isClusterLoaded = useMapStore((s) => s.isClusterLoaded);
   const zoom = useMapStore((s) => s.zoom);
-  console.log('vendors 받은 값', vendors);
 
   const clusterRef = useRef<{
     markers: naver.maps.Marker[];
@@ -26,7 +25,6 @@ export default function ClusterLayer({ vendors }: ClusterLayerProps) {
     const map = mapStore;
     const markers = clusterRef.current.markers;
     const zoomInit = map.getZoom();
-    console.log('zoom', zoomInit);
 
     // vendors 개수가 바뀌면 마커 재생성
     if (markers.length !== vendors.length) {
