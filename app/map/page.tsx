@@ -5,9 +5,9 @@ import { useEffect, useMemo } from 'react';
 import Navermap from './NaverMap';
 import MarkerLayer from './MarkerLayer';
 import ClusterLayer from './ClusterLayer';
-import { VendorsListDto } from '@/api/dto/vendors.dto';
+import { VendorsListDto } from '@/api/dto/vendorsDto';
 import { getVendorsList } from '@/api/vendors';
-import { HospitalMarker } from '@/components/Map/HospitalMarker';
+import { ExMarker } from '@/components/Map/ExMarker';
 import { useMapStore } from '@/store/mapStore';
 
 export default function Map() {
@@ -19,18 +19,22 @@ export default function Map() {
   const [vendorList, setVendorList] = useState<VendorsListDto[]>([]);
 
   // 각 레이어에 삽입될 필터 값
-  const hospitalVendors = vendorList.filter(
-    (vendor) => vendor.category === 'hospital',
-  );
-  const shopVendors = vendorList.filter((vendor) => vendor.category === 'shop');
+  // const hospitalVendors = vendorList.filter(
+  //   (vendor) => vendor.category === 'hospital',
+  // );
+  // const shopVendors = vendorList.filter((vendor) => vendor.category === 'shop');
+
+  const filterData = vendorList;
 
   // 클러스터 배열
-  const clusterData = useMemo(() => {
-    return [
-      ...(layerVisible.layer1 ? hospitalVendors : []),
-      ...(layerVisible.layer2 ? shopVendors : []),
-    ];
-  }, [layerVisible, hospitalVendors, shopVendors]);
+  // const clusterData = useMemo(() => {
+  //   return [
+  //     ...(layerVisible.layer1 ? hospitalVendors : []),
+  //     ...(layerVisible.layer2 ? shopVendors : []),
+  //   ];
+  // }, [layerVisible, hospitalVendors, shopVendors]);
+
+  const clusterData = filterData;
 
   //  마커 클릭 이벤트
   const handleMarkerClick = (data: VendorsListDto) => {
@@ -39,19 +43,19 @@ export default function Map() {
   };
 
   // 리페칭 함수 (필터, 검색)
-  const handleMapData = async (map: naver.maps.Map) => {
+  const fetchMapData = async (map: naver.maps.Map) => {
     const center = map.getCenter();
+    console.log('페칭함수', center);
 
-    console.log('페칭함수➡️➡️➡️➡️➡️➡️➡️➡️', center);
-    const data = await getVendorsList();
-    if (data) setVendorList(data);
+    const res = await getVendorsList(center.x, center.y);
+    if (res) setVendorList(res.data);
     return;
   };
 
   useEffect(() => {
     if (!isMapLoaded || !mapStore) return;
     const fetchData = async () => {
-      await handleMapData(mapStore);
+      await fetchMapData(mapStore);
     };
     fetchData();
   }, [isMapLoaded, mapStore]);
@@ -60,7 +64,7 @@ export default function Map() {
     <>
       <div className="flex min-h-screen items-center justify-center">
         <div className="flex min-h-screen w-full flex-col justify-content-between items-center">
-          <Navermap refetch={handleMapData} />
+          <Navermap refetch={fetchMapData} />
 
           <div className="bg-white p-2 absolute z-10 right-0 top-0">
             <label>
@@ -86,14 +90,14 @@ export default function Map() {
           </div>
 
           <MarkerLayer
-            vendors={hospitalVendors}
+            vendors={filterData}
             onItemClick={handleMarkerClick}
             layerKey="layer1"
-            MarkerComponent={HospitalMarker}
+            MarkerComponent={ExMarker}
           />
 
           <MarkerLayer
-            vendors={shopVendors}
+            vendors={filterData}
             onItemClick={handleMarkerClick}
             layerKey="layer2"
           />

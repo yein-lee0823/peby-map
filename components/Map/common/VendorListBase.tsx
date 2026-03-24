@@ -1,21 +1,23 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { VendorListBaseProps } from '@/types/vendor'
-import { useRouter } from 'next/navigation'
+// import Image from 'next/image'
+import { VendorListBaseProps } from '@/types/vendor';
+import { useRouter } from 'next/navigation';
 
 export const VendorListBase = ({ data, onItemClick }: VendorListBaseProps) => {
-  const Component = onItemClick ? 'button' : 'div'
-  const router = useRouter()
+  const Component = onItemClick ? 'button' : 'div';
+  const router = useRouter();
+
+  const listData = data.businessList[0]?.business;
 
   const handleItemClick = () => {
     if (onItemClick) {
-      onItemClick(data)
-      return
+      onItemClick(data);
+      return;
     }
 
-    router.push(`/map/${data.id}`)
-  }
+    router.push(`/map/${listData.placeId}`);
+  };
 
   return (
     <>
@@ -24,20 +26,21 @@ export const VendorListBase = ({ data, onItemClick }: VendorListBaseProps) => {
         onClick={onItemClick ? handleItemClick : undefined}
       >
         <div>
-          <Image
-            src={data.thumbnail}
-            alt={`썸네일 ${data.name}`}
-            width={data.imgWidth}
-            height={data.imgHeight}
-          />
+          {/* todo : api 데이터에 이미지 추가 */}
+          {/* <Image
+            src={listData.image}
+            alt={`썸네일 ${listData.name}`}
+            width={listData.imgWidth ?? 50}
+            height={listData.imgHeight ?? 50}
+          /> */}
         </div>
         <div className="text-left">
-          <div className="font-semibold">{data.name}</div>
+          <div className="font-semibold">{listData.name}</div>
           <div className="text-sm text-gray-600 whitespace-nowrap">
-            {data.category}
+            {listData.businessType}
           </div>
         </div>
       </Component>
     </>
-  )
-}
+  );
+};

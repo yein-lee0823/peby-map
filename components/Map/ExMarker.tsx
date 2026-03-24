@@ -3,15 +3,14 @@
 import { VendorListBaseProps } from '@/types/vendor';
 import { VendorMarkerBase } from './common/VendorMarkerBase';
 
-export const HospitalMarker = ({ data, onItemClick }: VendorListBaseProps) => {
+export const ExMarker = ({ data, onItemClick }: VendorListBaseProps) => {
   const handleClick = () => {
-    // visitedMarker만의 로직
     onItemClick?.(data);
-    console.log('HospitalMarker만의 로직');
+    console.log('로직 추가');
   };
 
   return (
-    <div className="hospital-marker-wrapper">
+    <div className="ex-marker-wrapper">
       <VendorMarkerBase data={data} onItemClick={handleClick} />
       {/* UI 추가 */}
     </div>

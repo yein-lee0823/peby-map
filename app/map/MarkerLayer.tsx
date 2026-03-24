@@ -3,7 +3,7 @@
 import { VendorMarkerBase } from '@/components/Map/common/VendorMarkerBase';
 import { useEffect, useRef } from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { VendorsListDto } from '@/api/dto/vendors.dto';
+import { VendorsListDto } from '@/api/dto/vendorsDto';
 import { ComponentType } from 'react';
 import { useMapStore } from '@/store/mapStore';
 import { LayerKey } from '@/types/map';
@@ -122,7 +122,7 @@ const createOverlayClass = () => {
         <>
           {this.vendors.map((vendor) => (
             <Marker
-              key={vendor.id}
+              key={vendor.location.placeId}
               data={vendor}
               onItemClick={this.onItemClick}
             />
@@ -151,7 +151,7 @@ const createOverlayClass = () => {
         <>
           {this.vendors.map((vendor) => (
             <Marker
-              key={vendor.id}
+              key={vendor.location.placeId}
               data={vendor}
               onItemClick={this.onItemClick}
             />
@@ -175,7 +175,9 @@ const createOverlayClass = () => {
       if (!projection) return;
 
       this.vendors.forEach((vendor) => {
-        const el = this.div?.querySelector(`#marker-${vendor.id}`);
+        const el = this.div?.querySelector(
+          `#marker-${vendor.location.placeId}`,
+        );
 
         if (!el) {
           requestAnimationFrame(() => this.draw());
@@ -183,7 +185,10 @@ const createOverlayClass = () => {
         }
 
         const point = projection.fromCoordToOffset(
-          new naver.maps.LatLng(vendor.lat, vendor.lng),
+          new naver.maps.LatLng(
+            vendor.location.latitude,
+            vendor.location.longitude,
+          ),
         );
 
         const marker = el as HTMLElement;

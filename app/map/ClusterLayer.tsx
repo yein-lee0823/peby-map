@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { VendorsListDto } from '@/api/dto/vendors.dto';
 import { useMapStore } from '@/store/mapStore';
+import { VendorsListDto } from '@/api/dto/vendorsDto';
 
 interface ClusterLayerProps {
   vendors: VendorsListDto[];
@@ -33,7 +33,10 @@ export default function ClusterLayer({ vendors }: ClusterLayerProps) {
       clusterRef.current.markers = vendors.map(
         (vendor) =>
           new naver.maps.Marker({
-            position: new naver.maps.LatLng(vendor.lat, vendor.lng),
+            position: new naver.maps.LatLng(
+              vendor.location.latitude,
+              vendor.location.longitude,
+            ),
             icon: { content: '<div style="display:none;"></div>' },
           }),
       );
@@ -45,7 +48,12 @@ export default function ClusterLayer({ vendors }: ClusterLayerProps) {
       // 개수 같으면 위치만 업데이트
       markers.forEach((m, i) => {
         const vendor = vendors[i];
-        m.setPosition(new naver.maps.LatLng(vendor.lat, vendor.lng));
+        m.setPosition(
+          new naver.maps.LatLng(
+            vendor.location.latitude,
+            vendor.location.longitude,
+          ),
+        );
       });
     }
 

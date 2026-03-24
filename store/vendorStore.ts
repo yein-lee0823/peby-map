@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { VendorsListDto } from "@/api/dto/vendors.dto";
+import { create } from 'zustand';
+import { VendorsListDto } from '@/api/dto/vendorsDto';
 
 interface VendorsState {
   vendors: VendorsListDto[];
